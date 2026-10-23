@@ -10,10 +10,14 @@
 #include <vector>
 using namespace std;
 
+const int HORARIO_INICIO = 8;
+const int HORARIO_FIM    = 18;
+
+
 struct Agendamento {
     string paciente;
     string profissional;
-    string dia;
+    string data;
     int horario;
     int duracao;
     string status;
@@ -21,43 +25,96 @@ struct Agendamento {
 
 vector<Agendamento> agendamentos;
 
-void agendar(string paciente, string profissional, string dia, int horario, int duracao) {
-    // adiciona na lista
-    try {
-        if (horario >= 8) {
-            if (horario < 18) {
-                if (duracao > 0) {
-                    bool ok = true;
-                    for (int i = 0; i < agendamentos.size(); i++) {
-                        if (agendamentos[i].dia == dia && agendamentos[i].horario == horario && agendamentos[i].profissional == profissional) {
-                            ok = false;
-                        }
-                    }
-                    if (ok) {
-                        agendamentos.push_back({paciente, profissional, dia, horario, duracao, "MARCADO"});
-                        cout << "Atendimento marcado para " << paciente << endl;
-                    } else {
-                        cout << "Horario ocupado" << endl;
-                    }
-                }
+bool verificarFormatoData(string data) {
+    if (data.size() != 10) {
+        return false;
+    }
+
+    int indiceDoZeroASCII  = 48;
+    int indiceDoNoveASCII  = 57;
+    int indiceDoHifenASCII = 45;
+    
+    for (int i = 0; i < 10; ++i) {
+        // Testar os hífens
+        if (i == 4 or i == 7) {
+            if (data[i] != indiceDoHifenASCII) {
+                return false;
             }
         }
-    } catch (...) {
+        // Testar os números
+        else {
+            if (data[i] < indiceDoZeroASCII or data[i] > indiceDoNoveASCII) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+bool verificarHorario(int horario, int duracao) {
+    float duracaoEmHoras = duracao / 60;
+
+    if (
+        horario < HORARIO_INICIO
+        or horario > HORARIO_FIM - 1 // A última consulta só pode começar até 1 hora antes de fechar
+        or duracao < 0
+        or horario + duracaoEmHoras > HORARIO_FIM + 1
+    ) {
+        return false;
+    }
+
+    return true;
+}
+
+void agendar(string paciente, string profissional, string data, int horario, int duracao) {
+    // adiciona na lista
+    try {
+        if (!verificarFormatoData(data)) {
+            throw invalid_argument("Formato inválido da data");
+        }
+        if (!verificarHorario(horario, duracao)) {
+            throw invalid_argument("Horário inválido");
+        }
+
+        bool ok = true;
+        for (int i = 0; i < agendamentos.size(); i++) {
+            if (agendamentos[i].data == data && agendamentos[i].horario == horario && agendamentos[i].profissional == profissional) {
+                ok = false;
+            }
+        }
+        if (ok) {
+            agendamentos.push_back({paciente, profissional, data, horario, duracao, "MARCADO"});
+            cout << "Atendimento marcado para " << paciente << endl;
+        } else {
+            cout << "Horario ocupado" << endl;
+        }
+
+    } catch (invalid_argument except) {
+        if (except.what() == "Formato inválido da data") {
+            cout << except.what() << ": " << data
+                 << "\nDatas devem estar no formato AAAA-MM-DD." << endl;
+        }
+        else if (except.what() == "Horário inválido") {
+            cout << except.what() << ": " << horario
+                 << "\nHorário fora da janela de atendimento." << endl;
+        }
+        return;
     }
 }
 
-void remarcar(string paciente, string dia, int horario, string novoDia, int novoHorario) {
+void remarcar(string paciente, string data, int horario, string novaData, int novoHorario) {
     // remarca o atendimento
     for (int i = 0; i < agendamentos.size(); i++) {
-        if (agendamentos[i].paciente == paciente && agendamentos[i].dia == dia && agendamentos[i].horario == horario) {
+        if (agendamentos[i].paciente == paciente && agendamentos[i].data == data && agendamentos[i].horario == horario) {
             bool ok = true;
             for (int j = 0; j < agendamentos.size(); j++) {
-                if (agendamentos[j].dia == novoDia && agendamentos[j].horario == novoHorario && agendamentos[j].profissional == agendamentos[i].profissional) {
+                if (agendamentos[j].data == novaData && agendamentos[j].horario == novoHorario && agendamentos[j].profissional == agendamentos[i].profissional) {
                     ok = false;
                 }
             }
             if (ok) {
-                agendamentos[i].dia = novoDia;
+                agendamentos[i].data = novaData;
                 agendamentos[i].horario = novoHorario;
                 cout << "Remarcado" << endl;
             } else {
@@ -73,10 +130,10 @@ void remarcar(string paciente, string dia, int horario, string novoDia, int novo
 
 // TODO: rever isso depois (Joao, 2025)
 
-void listar(string dia) {
+void listar(string data) {
     // lista os atendimentos do mes
     for (int i = 0; i < agendamentos.size(); i++) {
-        if (agendamentos[i].dia == dia) {
+        if (agendamentos[i].data == data) {
             cout << agendamentos[i].horario << " " << agendamentos[i].paciente << " " << agendamentos[i].profissional << " "
                  << agendamentos[i].status << endl;
         }
