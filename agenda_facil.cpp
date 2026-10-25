@@ -29,21 +29,17 @@ bool verificarFormatoData(string data) {
     if (data.size() != 10) {
         return false;
     }
-
-    int indiceDoZeroASCII  = 48;
-    int indiceDoNoveASCII  = 57;
-    int indiceDoHifenASCII = 45;
     
     for (int i = 0; i < 10; ++i) {
         // Testar os hífens
         if (i == 4 or i == 7) {
-            if (data[i] != indiceDoHifenASCII) {
+            if (data[i] != '-') {
                 return false;
             }
         }
-        // Testar os números
+        // Testar os números pela lógica da tabela ASCII
         else {
-            if (data[i] < indiceDoZeroASCII or data[i] > indiceDoNoveASCII) {
+            if (data[i] < '0' or data[i] > '9') {
                 return false;
             }
         }
