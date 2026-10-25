@@ -13,7 +13,6 @@ using namespace std;
 const int HORARIO_INICIO = 8;
 const int HORARIO_FIM    = 18;
 
-
 struct Agendamento {
     string paciente;
     string profissional;
@@ -76,6 +75,18 @@ bool verificarDisponibilidade(string profissional, string data, int horario) {
     return true;
 }
 
+void registrarAgendamento(string paciente, string profissional, string data, int horario, int duracao, bool disponivel) {
+    if (disponivel) {
+        agendamentos.push_back({paciente, profissional, data, horario, duracao, "MARCADO"});
+    }
+}
+
+void imprimirResultadoAgendamento(string paciente, bool disponivel) {
+    if (disponivel) cout << "Atendimento marcado para " << paciente;
+    else cout << "Horario ocupado";
+    cout << endl;
+};
+
 void agendar(string paciente, string profissional, string data, int horario, int duracao) {
     // adiciona na lista
     try {
@@ -88,12 +99,8 @@ void agendar(string paciente, string profissional, string data, int horario, int
 
         bool horariolivre = verificarDisponibilidade(profissional, data, horario);
         
-        if (horariolivre) {
-            agendamentos.push_back({paciente, profissional, data, horario, duracao, "MARCADO"});
-            cout << "Atendimento marcado para " << paciente << endl;
-        } else {
-            cout << "Horario ocupado" << endl;
-        }
+        registrarAgendamento(paciente, profissional, data, horario, duracao, horariolivre);
+        imprimirResultadoAgendamento(paciente, horariolivre);
 
     } catch (invalid_argument except) {
         if (except.what() == "Formato inválido da data") {
