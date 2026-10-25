@@ -67,6 +67,19 @@ bool verificarHorario(int horario, int duracao) {
     return true;
 }
 
+bool verificarDisponibilidade(string profissional, string data, int horario) {
+    for (int i = 0; i < agendamentos.size(); i++) {
+        if (
+            agendamentos[i].data == data
+            and agendamentos[i].horario == horario
+            and agendamentos[i].profissional == profissional
+        ) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void agendar(string paciente, string profissional, string data, int horario, int duracao) {
     // adiciona na lista
     try {
@@ -77,13 +90,9 @@ void agendar(string paciente, string profissional, string data, int horario, int
             throw invalid_argument("Horário inválido");
         }
 
-        bool ok = true;
-        for (int i = 0; i < agendamentos.size(); i++) {
-            if (agendamentos[i].data == data && agendamentos[i].horario == horario && agendamentos[i].profissional == profissional) {
-                ok = false;
-            }
-        }
-        if (ok) {
+        bool horariolivre = verificarDisponibilidade(profissional, data, horario);
+        
+        if (horariolivre) {
             agendamentos.push_back({paciente, profissional, data, horario, duracao, "MARCADO"});
             cout << "Atendimento marcado para " << paciente << endl;
         } else {
