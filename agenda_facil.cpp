@@ -136,12 +136,6 @@ void remarcar(string paciente, string data, int horario, string novaData, int no
     }
 }
 
-// void desmarcar(string p, string d, int h) {
-//     ag.erase(...);
-// }
-
-// TODO: rever isso depois (Joao, 2025)
-
 void listar(string data) {
     // lista os atendimentos do mes
     for (int i = 0; i < agendamentos.size(); i++) {
