@@ -59,7 +59,7 @@ bool verificarHorario(int horario, int duracao) {
         or horario > HORARIO_FIM - 1 // A última consulta só pode começar até 1 hora antes de fechar
         or duracao < 15
         or duracao > 120
-        or (duracao % 15 != 0)
+        or (duracao % 15 != 0) // Duração deve ser um múltiplo de 15 minutos
         or horario + duracaoEmHoras > HORARIO_FIM + 1
     ) {
         return false;
@@ -95,7 +95,7 @@ bool verificarDisponibilidade(string profissional, string data, int horario) {
  */
 void registrarAgendamento(Agendamento novoAgendamento, bool disponivel) {
     if (disponivel) {
-        novoAgendamento.status = "MARCADO";
+        novoAgendamento.status = "MARCADO"; // Os únicos status possíveis são MARCADO ou nenhum
         agendamentos.push_back(novoAgendamento);
     }
 }
