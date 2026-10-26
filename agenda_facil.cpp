@@ -53,7 +53,9 @@ bool verificarHorario(int horario, int duracao) {
     if (
         horario < HORARIO_INICIO
         or horario > HORARIO_FIM - 1 // A última consulta só pode começar até 1 hora antes de fechar
-        or duracao < 0
+        or duracao < 15
+        or duracao > 120
+        or (duracao % 15 != 0)
         or horario + duracaoEmHoras > HORARIO_FIM + 1
     ) {
         return false;
