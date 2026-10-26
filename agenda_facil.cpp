@@ -133,13 +133,13 @@ void agendarAtendimento(string paciente, string profissional, string data, int h
         registrarAgendamento(novoAgendamento, horariolivre);
         imprimirResultadoAgendamento(paciente, horariolivre);
 
-    } catch (invalid_argument except) {
+    } catch (const invalid_argument& except) {
         if (except.what() == "Formato inválido da data") {
-            cout << except.what() << ": " << data
+            cerr << except.what() << ": " << data
                  << "\nDatas devem estar no formato AAAA-MM-DD." << endl;
         }
         else if (except.what() == "Horário inválido") {
-            cout << except.what() << ": " << horario
+            cerr << except.what() << ": " << horario
                  << "\nHorário fora da janela de atendimento." << endl;
         }
         return;
@@ -148,9 +148,17 @@ void agendarAtendimento(string paciente, string profissional, string data, int h
 
 void remarcarAtendimento(string paciente, string data, int horario, string novaData, int novoHorario) {
     
-    int indiceAgendamento = procurarAgendamento(paciente, data, horario);
+    try {
+        if (!verificarFormatoData(data) or !verificarFormatoData(novaData)) {
+            throw std::invalid_argument("Formato inválido da data");
+        } 
+        
+        int indiceAgendamento = procurarAgendamento(paciente, data, horario);
     
-    if (indiceAgendamento >= 0) {
+        if (indiceAgendamento < 0) {
+            throw std::logic_error("Atendimento não está na lista.");
+        }
+        
         string profissional = agendamentos[indiceAgendamento].profissional;
         bool disponivel = verificarDisponibilidade(profissional, novaData, novoHorario);
 
@@ -159,8 +167,11 @@ void remarcarAtendimento(string paciente, string data, int horario, string novaD
         }
         imprimirResultadoRemarcado(disponivel);
     }
-    else {
-        cout << "Atendimento não está na lista." << endl;
+    catch(const logic_error& e) {
+        std::cerr << e.what() << endl;
+    }
+    catch(const invalid_argument& err) {
+        cerr << err.what() << endl;
     }
 }
 
