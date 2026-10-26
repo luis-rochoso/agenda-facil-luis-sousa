@@ -1,17 +1,10 @@
-// ==========================================================
-// Arquivo: agenda_base.cpp
-// Autor: Equipe de estagiarios - 03/02/2024
-// Alterado por: Joao - 15/05/2025
-// Alterado por: Marina - 09/01/2026
-// ==========================================================
-
 #include <iostream>
 #include <string>
 #include <vector>
 using namespace std;
 
-const int HORARIO_INICIO = 8;
-const int HORARIO_FIM    = 18;
+const int HORARIO_INICIO = 8;  //!< Hora do dia em que se iniciam atendimentos
+const int HORARIO_FIM    = 18; //!< Hora do dia limite para atendimentos
 
 struct Agendamento {
     string paciente;
@@ -24,6 +17,11 @@ struct Agendamento {
 
 vector<Agendamento> agendamentos;
 
+/**
+ * @brief Verifica se uma string está no formato AAAA-MM-DD de data
+ * @param data String de texto representando uma data
+ * @return true se a data estiver no formato certo, false caso contrário
+ */
 bool verificarFormatoData(string data) {
     if (data.size() != 10) {
         return false;
@@ -47,6 +45,12 @@ bool verificarFormatoData(string data) {
     return true;
 }
 
+/**
+ * @brief Verifica se o intervalo de tempo para um atendimento é válido
+ * @param horario Hora de início do atendimento
+ * @param duracao Duração, em minutos, do atendimento
+ * @return true so o horário for válido, false caso contrário
+ */
 bool verificarHorario(int horario, int duracao) {
     float duracaoEmHoras = duracao / 60;
 
@@ -64,6 +68,13 @@ bool verificarHorario(int horario, int duracao) {
     return true;
 }
 
+/**
+ * @brief Verifica se um horário de atendimento está disponível, consideranto data, hora e profissional
+ * @param profissional Profissional que realizará o atendimento
+ * @param data Data, no formato AAAA-MM-DD, do atendimento
+ * @param horario Horário do atendimento
+ * @return true se o horário estiver livre, false se não estiver.
+ */
 bool verificarDisponibilidade(string profissional, string data, int horario) {
     for (int i = 0; i < agendamentos.size(); i++) {
         if (
@@ -77,6 +88,11 @@ bool verificarDisponibilidade(string profissional, string data, int horario) {
     return true;
 }
 
+/**
+ * @brief Insere um agendamento na lista se seu horário estiver disponível
+ * @param novoAgendamento Agendamento a ser adicionado
+ * @param disponivel Booleano que determina a disponibilidade do horário
+ */
 void registrarAgendamento(Agendamento novoAgendamento, bool disponivel) {
     if (disponivel) {
         novoAgendamento.status = "MARCADO";
@@ -84,12 +100,24 @@ void registrarAgendamento(Agendamento novoAgendamento, bool disponivel) {
     }
 }
 
+/**
+ * @brief Envia à saída padrão o resultado de uma tentativa de agendamento
+ * @param paciente Nome do paciente do agendamento
+ * @param disponivel Booleano que determina a disponibilidade do horário
+ */
 void imprimirResultadoAgendamento(string paciente, bool disponivel) {
     if (disponivel) cout << "Atendimento marcado para " << paciente;
     else cout << "Horario ocupado";
     cout << endl;
 }
 
+/**
+ * @brief Busca na lista de agendamentos por um específico, determinado pelos parâmetros
+ * @param paciente Paciente do agendamento a ser buscado
+ * @param data Data, no formato AAAA-MM-DD, do agendamento a ser buscado
+ * @param horario Horário do agendamento a ser buscado
+ * @return Índice do agendamento encontrado, ou -1 se não for encontrado 
+ */
 // retorna o índice ao agendamento marcado encontrado
 int procurarAgendamento(string paciente, string data, int horario) {
     
@@ -106,11 +134,21 @@ int procurarAgendamento(string paciente, string data, int horario) {
     return -1;
 }
 
+/**
+ * @brief Atualiza as informações de um agendamento existente de acordo com os parâmetros
+ * @param alvo Agendamento a ser alterado
+ * @param novoHorario Horário novo do agendamento alvo
+ * @param novaData Data nova, no formato AAAA-MM-DD, do agendamento alvo
+ */
 void atualizarAgendamentoRemarcado(Agendamento &alvo, int novoHorario, string novaData) {
     alvo.horario = novoHorario;
     alvo.data = novaData;
 }
 
+/**
+ * @brief Envia à saída padrão o resultado de uma tentativa de remarcar agendamento
+ * @param disponivel Booleano que determina se o agendamento pôde ou não ser remarcado
+ */
 void imprimirResultadoRemarcado(bool disponivel) {
     if (disponivel) {
         cout << "Remarcado" << endl;
@@ -120,6 +158,15 @@ void imprimirResultadoRemarcado(bool disponivel) {
     }
 }
 
+/**
+ * @brief Registra um agendamento novo
+ * @param paciente Nome do paciente a ser atendido
+ * @param profissional Nome do profissional a realizar o atendimento
+ * @param data Data, no formato AAAA-MM-DD, do atendimento
+ * @param horario Hora do atendimento
+ * @param duracao Duração, em minutos, do atendimento
+ * @throw except Exceção jogada quando o formato da data ou o horário está inválido 
+ */
 void agendarAtendimento(string paciente, string profissional, string data, int horario, int duracao) {
     try {
         if (!verificarFormatoData(data)) {
@@ -148,6 +195,16 @@ void agendarAtendimento(string paciente, string profissional, string data, int h
     }
 }
 
+/**
+ * @brief Remarca um atendimento agendado
+ * @param paciente Nome do paciente
+ * @param data Data, no formato AAAA-MM-DD, do atendimento agendado
+ * @param horario Hora do atendimento agendado
+ * @param novaData Data, no formato AAAA-MM-DD, que substituirá a data agendada
+ * @param novoHorario Horário que substituirá o horário agendado
+ * @throw e Exceção jogada quando o atendimento passado na função não está na lista
+ * @throw err Exceção jogada quando o formato da data está inválido
+ */
 void remarcarAtendimento(string paciente, string data, int horario, string novaData, int novoHorario) {
     
     try {
@@ -177,6 +234,10 @@ void remarcarAtendimento(string paciente, string data, int horario, string novaD
     }
 }
 
+/**
+ * @brief Envia à saída padrão as informações sobre cada agendamento em um dia, um por linha
+ * @param data Data, no formato AAAA-MM-DD, cujos atendimentos serão listados
+ */
 void listarAtendimentosDoDia(string data) {
     for (int i = 0; i < agendamentos.size(); i++) {
         if (agendamentos[i].data == data) {
